@@ -10,7 +10,7 @@ const Header = () => {
                 </nav>
             </div>
             <div className="flex items-center space-x-4">
-                <input type="text" className="bg-amber-50 text-black"/>
+                <input type="text" placeholder="Search" className="bg-amber-50 text-black"/>
                 <button className="text-white bg-red-700 p-3 rounded">Search</button>
             </div>
         </div>
