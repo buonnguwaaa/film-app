@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react'
-
+import Modal from 'react-modal'
 import Header from './components/Header'
 import Banner from './components/Banner'
 import MovieList from './components/MovieList'
@@ -50,6 +50,8 @@ function App() {
   fetchPopularMovies();
   fetchTopRatedMovies();
 }, []);
+
+  Modal.setAppElement('#root');
 
   return (
     <div>
