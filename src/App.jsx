@@ -18,11 +18,14 @@ function App() {
         }
       };
 
+      const popularUrl = 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1';
+      const topRatedUrl = 'https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1';
+
       try {
         // Fetch cả 2 API cùng lúc using Promise.all
         const [popularResponse, topRatedResponse] = await Promise.all([
-          fetch('https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', options),
-          fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
+          fetch(popularUrl, options),
+          fetch(topRatedUrl, options)
         ]);
 
         const popularData = await popularResponse.json();
