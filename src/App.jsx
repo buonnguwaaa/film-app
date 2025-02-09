@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import Modal from 'react-modal'
 import Header from './components/Header'
 import Banner from './components/Banner'
@@ -9,8 +9,7 @@ function App() {
   const [topRatedMovies, setTopRatedMovies] = useState([])
 
   useEffect(() => {
-    const fetchPopularMovies = async () => {
-      const popular_movie_url = 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1';
+    const fetchMovies = async () => {
       const options = {
         method: 'GET',
         headers: {
@@ -20,36 +19,28 @@ function App() {
       };
 
       try {
-        const response = await fetch(popular_movie_url, options);
-        const data = await response.json();
-        setPopularMovies(data.results);
-        console.log('Popular Movies: ', data.results);
+        // Fetch cả 2 API cùng lúc using Promise.all
+        const [popularResponse, topRatedResponse] = await Promise.all([
+          fetch('https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', options),
+          fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
+        ]);
+
+        const popularData = await popularResponse.json();
+        const topRatedData = await topRatedResponse.json();
+
+        setPopularMovies(popularData.results);
+        setTopRatedMovies(topRatedData.results);
+
+        console.log('Popular Movies:', popularData.results);
+        console.log('Top Rated Movies:', topRatedData.results);
+
       } catch (error) {
-        console.error('Error fetching Popular Movies: ', error);
-      }
-  }
-  const fetchTopRatedMovies = async () => {
-    const top_rated_movie_url = 'https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1';
-    const options = {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_MOVIEDB_API}`
+        console.error('Error fetching movies:', error);
       }
     };
 
-    try {
-      const response = await fetch(top_rated_movie_url, options);
-      const data = await response.json();
-      setTopRatedMovies(data.results);
-      console.log('TopMovies: ', data.results);
-    } catch (error) {
-      console.error('Error fetching Top Rated Movies: ', error);
-    }
-  }
-  fetchPopularMovies();
-  fetchTopRatedMovies();
-}, []);
+    fetchMovies();
+  }, []);
 
   Modal.setAppElement('#root');
 
@@ -57,8 +48,8 @@ function App() {
     <div>
       <Header />
       <Banner />
-      <MovieList title={"Phim Hot"} data={popularMovies}/>
-      <MovieList title={"Phim Đề Cử"} data={topRatedMovies}/>
+      <MovieList title="Phim Hot" data={popularMovies} />
+      <MovieList title="Phim Đề Cử" data={topRatedMovies} />
     </div>
   )
 }
