@@ -3,10 +3,37 @@ import Modal from 'react-modal'
 import Header from './components/layouts/Header'
 import Banner from './components/layouts/Banner'
 import MovieList from './components/movies/MovieList'
+import FindMovie from './components/movies/FindMovie'
 
 function App() {
   const [popularMovies, setPopularMovies] = useState([])
   const [topRatedMovies, setTopRatedMovies] = useState([])
+  const [searchedMovies, setSearchedMovies] = useState([])
+
+  const handleSearch = async (searchTerm) => {
+    const url = `https://api.themoviedb.org/3/search/movie?query=${searchTerm}&language=en-US&page=1`;
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_MOVIEDB_API}`
+      }
+    };
+
+    if (!searchTerm) {
+      setSearchedMovies([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      setSearchedMovies(data.results);
+    } catch (error) {
+      console.error('Error searching movies:', error);
+      setSearchedMovies([]);
+    }
+  }
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -49,10 +76,16 @@ function App() {
 
   return (
     <div>
-      <Header />
+      <Header onSearch={handleSearch}/>
       <Banner />
-      <MovieList title="Phim Hot" data={popularMovies} />
-      <MovieList title="Phim Đề Cử" data={topRatedMovies} />
+      {searchedMovies ? 
+        <FindMovie data={searchedMovies.slice(0,10)} /> : 
+        <>
+          <MovieList title="Phim Hot" data={popularMovies.slice(0, 10)} />
+          <MovieList title="Phim Đề Cử" data={topRatedMovies.slice(0, 10)} />
+        </>
+      }
+      
     </div>
   )
 }
