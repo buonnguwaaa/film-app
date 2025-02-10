@@ -1,75 +1,68 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Modal from 'react-modal'
 import Header from './components/layouts/Header'
 import Banner from './components/layouts/Banner'
 import MovieList from './components/movies/MovieList'
 import FindMovie from './components/movies/FindMovie'
+import Pagination from './components/common/Pagination'
+import { searchMovies, getPopularMovies, getTopRatedMovies } from './services/movieApi'
 
 function App() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(0)
   const [popularMovies, setPopularMovies] = useState([])
   const [topRatedMovies, setTopRatedMovies] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
   const [searchedMovies, setSearchedMovies] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
 
-  const handleSearch = async (searchTerm) => {
-    const url = `https://api.themoviedb.org/3/search/movie?query=${searchTerm}&language=en-US&page=1`;
-    const options = {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_MOVIEDB_API}`
-      }
-    };
+  const searchResultRef = useRef(null)
 
-    if (!searchTerm) {
+  const handleSearch = async (term, page = 1) => {
+    setSearchTerm(term);
+    
+    if (!term) {
       setSearchedMovies([]);
+      setIsSearching(false);
       return;
     }
 
     try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      setSearchedMovies(data.results);
+      const data = await searchMovies(term, page);
+      if (data?.results) {
+        setSearchedMovies(data.results);
+        setIsSearching(true);
+        setTotalPages(data.total_pages);
+        setCurrentPage(data.page);
+        searchResultRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
     } catch (error) {
       console.error('Error searching movies:', error);
       setSearchedMovies([]);
+      setIsSearching(false);
     }
   }
 
+  const handlePageChange = (page) => {
+    handleSearch(searchTerm, page);
+  };
+
   useEffect(() => {
-    const fetchMovies = async () => {
-      const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_MOVIEDB_API}`
-        }
-      };
-
-      const popularUrl = 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1';
-      const topRatedUrl = 'https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1';
-
+    const fetchInitialMovies = async () => {
       try {
-        // Fetch cả 2 API cùng lúc using Promise.all
-        const [popularResponse, topRatedResponse] = await Promise.all([
-          fetch(popularUrl, options),
-          fetch(topRatedUrl, options)
+        const [popularData, topRatedData] = await Promise.all([
+          getPopularMovies(),
+          getTopRatedMovies()
         ]);
-
-        const popularData = await popularResponse.json();
-        const topRatedData = await topRatedResponse.json();
 
         setPopularMovies(popularData.results);
         setTopRatedMovies(topRatedData.results);
-
-        console.log('Popular Movies:', popularData.results);
-        console.log('Top Rated Movies:', topRatedData.results);
-
       } catch (error) {
-        console.error('Error fetching movies:', error);
+        console.error('Error fetching initial movies:', error);
       }
     };
 
-    fetchMovies();
+    fetchInitialMovies();
   }, []);
 
   Modal.setAppElement('#root');
@@ -78,14 +71,23 @@ function App() {
     <div>
       <Header onSearch={handleSearch}/>
       <Banner />
-      {searchedMovies ? 
-        <FindMovie data={searchedMovies.slice(0,10)} /> : 
-        <>
-          <MovieList title="Phim Hot" data={popularMovies.slice(0, 10)} />
-          <MovieList title="Phim Đề Cử" data={topRatedMovies.slice(0, 10)} />
-        </>
-      }
-      
+      <div ref={searchResultRef} className='scroll-mt-16'>
+        {isSearching && searchedMovies.length > 0 ? (
+          <>
+            <FindMovie data={searchedMovies}/>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </> 
+        ) : (
+          <>
+            <MovieList title="Phim Hot" data={popularMovies.slice(0, 10)} />
+            <MovieList title="Phim Đề Cử" data={topRatedMovies.slice(0, 10)} />
+          </>
+        )}
+      </div>
     </div>
   )
 }
