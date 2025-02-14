@@ -2,7 +2,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Modal from 'react-modal'
 import MainLayout from './components/layouts/MainLayout'
-import Home from './pages/home/Home'
+import AuthLayout from './components/layouts/AuthLayout'
+import Home from './pages/main/Home'
+import AuthLogin from './pages/auth/AuthLogin'
+import AuthRegister from './pages/auth/AuthRegister'
 
 function App() {
   Modal.setAppElement('#root')
@@ -12,6 +15,10 @@ function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+        </Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<AuthLogin />} />
+          <Route path="/register" element={<AuthRegister />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,7 @@
 // pages/Home/index.jsx
 import { useEffect } from 'react'
 import Banner from '@/components/layouts/Banner'
+import MovieDetail from '../../components/features/movies/MovieDetail'
 import MoviesGrid from '@/components/features/movies/MoviesGrid'
 import Pagination from '@/components/common/Pagination'
 import MoviesCarousel from '@/components/features/movies/MoviesCarousel'
@@ -22,8 +23,8 @@ const Home = () => {
 
   return (
     <>
-      <Banner />
-      <div ref={searchResultRef} className='scroll-mt-16'>
+      <MovieDetail />
+      <div ref={searchResultRef} className='scroll-point'>
         {search.isSearching ? (
           <>
             <MoviesGrid data={movies.searched} />

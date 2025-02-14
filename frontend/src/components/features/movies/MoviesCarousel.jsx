@@ -45,6 +45,7 @@ const customStyles = {
 };
 
 const MoviesCarousel = ({title, data = []}) => {
+  console.log(data)
   if (!data) return <div className="text-white">Loading...</div>;
 
   return (
