@@ -4,6 +4,7 @@ import Modal from 'react-modal'
 import MainLayout from './components/layouts/MainLayout'
 import AuthLayout from './components/layouts/AuthLayout'
 import Home from './pages/main/Home'
+import MovieDetails from './components/features/movies/MovieDetails'
 import AuthLogin from './pages/auth/AuthLogin'
 import AuthRegister from './pages/auth/AuthRegister'
 
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/movie/:id" element={<MovieDetails />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<AuthLogin />} />

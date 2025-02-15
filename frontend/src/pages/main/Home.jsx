@@ -1,7 +1,6 @@
 // pages/Home/index.jsx
 import { useEffect } from 'react'
 import Banner from '@/components/layouts/Banner'
-import MovieDetail from '../../components/features/movies/MovieDetail'
 import MoviesGrid from '@/components/features/movies/MoviesGrid'
 import Pagination from '@/components/common/Pagination'
 import MoviesCarousel from '@/components/features/movies/MoviesCarousel'
@@ -23,8 +22,7 @@ const Home = () => {
 
   return (
     <>
-      <MovieDetail />
-      <div ref={searchResultRef} className='scroll-point'>
+      <div ref={searchResultRef} className='scroll-mt-16'>
         {search.isSearching ? (
           <>
             <MoviesGrid data={movies.searched} />
@@ -36,6 +34,7 @@ const Home = () => {
           </>
         ) : (
           <>
+            <Banner />
             <MoviesCarousel title="Phim Hot" data={movies.popular.slice(0, 10)} />
             <MoviesCarousel title="Phim Đề Cử" data={movies.topRated.slice(0, 10)} />
           </>

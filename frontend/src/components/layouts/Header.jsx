@@ -12,7 +12,7 @@ const Header = ({ onSearch }) => {
         onSearch(search.term);
         // Thêm timeout để đảm bảo element đã được render trước khi scroll
         setTimeout(() => {
-            const searchResult = document.querySelector('.scroll-point');
+            const searchResult = document.querySelector('.scroll-mt-16');
             if (searchResult) {
                 searchResult.scrollIntoView({ behavior: 'smooth' });
             }

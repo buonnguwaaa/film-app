@@ -1,7 +1,7 @@
 // hooks/useMovies.js
 import { useRef } from 'react'
 import useMovieStore from '@/store/movieStore'
-import { getPopularMovies, getTopRatedMovies, searchMovies } from '@/services/movieService'
+import { getPopularMovies, getTopRatedMovies, getMovieDetails, searchMovies } from '@/services/movieService'
 
 const useMovies = () => {
   const { movies, pagination, search, setMovies, setPagination, setSearch } = useMovieStore()
@@ -51,7 +51,7 @@ const useMovies = () => {
     search,
     searchResultRef,
     handleSearch,
-    fetchInitialMovies
+    fetchInitialMovies,
   }
 }
 

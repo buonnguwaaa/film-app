@@ -7,7 +7,7 @@ const MainLayout = () => {
   const { handleSearch } = useMovies()
 
   return (
-    <div>
+    <div className='bg-black'>
       <Header onSearch={handleSearch} />
       <main>
         <Outlet />

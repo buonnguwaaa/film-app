@@ -17,6 +17,14 @@ export const searchMovies = async (query, page = 1) => {
   return response.json();
 };
 
+export const getMovieDetails = async (id) => {
+  const response = await fetch(
+    `${BASE_URL}/movie/${id}?language=en-US`,
+    getOptions()
+  );
+  return response.json();
+}
+
 export const getPopularMovies = async () => {
   const response = await fetch(
     `${BASE_URL}/movie/popular?language=en-US&page=1`,
