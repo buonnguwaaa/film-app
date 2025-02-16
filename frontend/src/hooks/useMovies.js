@@ -1,11 +1,13 @@
 // hooks/useMovies.js
 import { useRef } from 'react'
+import { useNavigate } from 'react-router-dom';
 import useMovieStore from '@/store/movieStore'
-import { getPopularMovies, getTopRatedMovies, getMovieDetails, searchMovies } from '@/services/movieService'
+import { getPopularMovies, getTopRatedMovies, searchMovies } from '@/services/movieService'
 
 const useMovies = () => {
   const { movies, pagination, search, setMovies, setPagination, setSearch } = useMovieStore()
   const searchResultRef = useRef(null)
+  const navigate = useNavigate()
 
   const fetchInitialMovies = async () => {
     try {
@@ -33,7 +35,8 @@ const useMovies = () => {
           currentPage: page,
           totalPages: results.total_pages
         })
-        
+
+        navigate(`/search?query=${term}&page=${page}`, { replace: true }) 
         searchResultRef.current?.scrollIntoView({ behavior: 'smooth' })
       }
       else {

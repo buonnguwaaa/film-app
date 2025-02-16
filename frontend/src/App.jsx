@@ -4,7 +4,8 @@ import Modal from 'react-modal'
 import MainLayout from './components/layouts/MainLayout'
 import AuthLayout from './components/layouts/AuthLayout'
 import Home from './pages/main/Home'
-import MovieDetails from './components/features/movies/MovieDetails'
+import MovieDetails from './pages/main/MovieDetails'
+import SearchMovies from './pages/main/SearchMovies'
 import AuthLogin from './pages/auth/AuthLogin'
 import AuthRegister from './pages/auth/AuthRegister'
 
@@ -14,13 +15,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/movie/:id" element={<MovieDetails />} />
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Home />} />
+          <Route path="movie/:id" element={<MovieDetails />} />
+          <Route path="search" element={<SearchMovies />} />
         </Route>
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<AuthLogin />} />
-          <Route path="/register" element={<AuthRegister />} />
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route path="login" element={<AuthLogin />} />
+          <Route path="register" element={<AuthRegister />} />
         </Route>
       </Routes>
     </BrowserRouter>

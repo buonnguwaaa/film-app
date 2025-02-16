@@ -25,7 +25,7 @@ const Register = () => {
                     </button>
                     <div className="flex items-center justify-between">
                         <div className="text-white">Bạn đã có tài khoản?</div>
-                        <a href="/login" className="text-red-500">Đăng nhập</a>
+                        <a href="/auth/login" className="text-red-500">Đăng nhập</a>
                     </div>
                 </form>
             </>

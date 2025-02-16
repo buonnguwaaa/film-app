@@ -15,7 +15,7 @@ const Login = () => {
                 <button className="w-full cursor-pointer bg-red-500 text-white py-2 rounded hover:bg-red-600 transition-colors mt-2 mb-3">Đăng nhập</button>
                 <div className="flex items-center justify-between">
                     <div className="text-white">Bạn chưa có tài khoản?</div>
-                    <a href="/register" className="text-red-500">Đăng ký</a>
+                    <a href="/auth/register" className="text-red-500">Đăng ký</a>
                 </div>
             </form>
         </>
