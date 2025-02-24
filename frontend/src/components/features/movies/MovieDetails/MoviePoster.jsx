@@ -1,5 +1,5 @@
 import PropType from 'prop-types'
-import IconPlay from '@/assets/play-button.png'
+import IconPlay from '@/assets/images/play-button.png'
 
 // components/features/movies/MovieDetails/MoviePoster.jsx
 const MoviePoster = ({ movie, onPosterClick }) => (
