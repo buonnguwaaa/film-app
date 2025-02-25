@@ -2,15 +2,22 @@ import { create } from 'zustand';
 
 const useAuthStore = create((set) => {
     const token = localStorage.getItem('token');
-    const isLoggedIn = !!token; // Kiểm tra sự tồn tại của token
-
+    const user = JSON.parse(localStorage.getItem('user'));
+    const isLoggedIn = !!token; 
+    
     return {
         isLoggedIn,
-        user: null,
-        login: (userId) => set({ isLoggedIn: true, user: userId }),
+        user: user || {},
+        login: (userData) => set({ isLoggedIn: true, user: userData }),
+        register: (userData) => {
+            localStorage.removeItem('user');
+            localStorage.setItem('user', JSON.stringify(userData));
+            set({ isLoggedIn: false, user: userData });
+        },
         logout: () => {
             localStorage.removeItem('token');
-            set({ isLoggedIn: false, user: null });
+            localStorage.removeItem('user');
+            set({ isLoggedIn: false, user: {} });
         }
     };
 });

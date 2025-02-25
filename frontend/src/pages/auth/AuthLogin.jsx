@@ -3,10 +3,10 @@ import SocialAuth from '../../components/features/auth/SocialAuth';
 
 const AuthLogin = () => {
     return (
-            <>
-                <Login />
-                <SocialAuth />                
-            </>
+        <>
+            <Login />
+            <SocialAuth />                
+        </>
     );
 };
 

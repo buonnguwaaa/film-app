@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { RegisterAPI } from "../../../services/authService";
+import useAuthStore from "../../../store/authStore";
 
 const Register = () => {
     const navigate = useNavigate();
+    const { register } = useAuthStore();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,7 +18,13 @@ const Register = () => {
         }
         try {
             const data = await RegisterAPI(email, username, password);
-            navigate('/auth/login');
+            console.log(data);
+            const dataUser = {
+                id: data.id,
+                email: data.email,
+            }
+            register(dataUser);
+            navigate('/auth/verification');
         } catch (error) {
             console.error('Error registering:', error);
         }

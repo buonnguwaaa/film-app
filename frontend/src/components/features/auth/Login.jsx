@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { LoginAPI } from "../../../services/authService";
 import useAuthStore from "../../../store/authStore";
+
 const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuthStore()
@@ -13,8 +14,7 @@ const Login = () => {
             const data = await LoginAPI(email, password);
             console.log(data)
             localStorage.setItem('token', data.token);
-            login(data.id)
-            // Login()
+            login(data.user)
             navigate('/');
         } catch (error) {
             console.error('Error logging in:', error);
