@@ -1,0 +1,25 @@
+.arrow-container {
+    position: absolute;
+    bottom: -2px; /* Điều chỉnh vị trí */
+    left: 82%;
+    transform: translateX(-50%);
+    width: 12px; /* Độ rộng của hình tròn */
+    height: 12px; /* Độ cao của hình tròn */
+    background-color: rgb(0, 0, 0); /* Màu nền của hình tròn */
+    border-radius: 50%; /* Biến thành hình tròn */
+    border: 1.5px solid rgb(177, 177, 177); /* Định nghĩa border đúng cú pháp */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Đổ bóng nhẹ */
+    
+}
+
+.arrow-down {
+    width: 0; 
+    height: 0;
+    margin-top: 1.5px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgb(177, 177, 177)
+}

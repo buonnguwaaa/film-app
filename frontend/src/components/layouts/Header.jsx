@@ -1,12 +1,15 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react'
 import useMovieStore from '@/store/movieStore'
 import useAuthStore from '../../store/authStore';
 import useScrollDirection from '@/hooks/useScrollDirection';
+import './Header.css'
 import { FaSearch } from 'react-icons/fa';
 import DropDown from '../common/DropDown'
 import DefaultAvatar from '@/assets/images/default-avatar.png'
 
 const Header = ({ onSearch }) => {
+    const [isDropDown, setDropDown] = useState(false)
     const { search, setSearch } = useMovieStore()
     const { isLoggedIn } = useAuthStore()
     const isVisible = useScrollDirection();
@@ -16,6 +19,10 @@ const Header = ({ onSearch }) => {
         onSearch(search.term);
     };
     console.log('isLoggedIn: ', isLoggedIn)
+
+    const toggleDropDown = () => {
+        return setDropDown(!isDropDown)
+    }
 
     return (
         <div className={`fixed top-0 left-0 right-0 z-50 bg-black space-x-4 py-2 transition-transform duration-300 ${
@@ -76,10 +83,18 @@ const Header = ({ onSearch }) => {
                 {/* Login - Căn phải */}
                 
                 { isLoggedIn ? 
-                    <button className='flex items-center mr-4 cursor-pointer relative'>
-                        <img src= {DefaultAvatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
-                        <DropDown/>
-                    </button> :
+                    
+                        <button className='flex items-center mr-6 cursor-pointer relative' onClick={toggleDropDown}>
+                            <img src= {DefaultAvatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+                            <div className="arrow-container">
+                                <div className="arrow-down"></div>
+                            </div>
+                            { isDropDown ?
+                                <DropDown/> :
+                                <></>
+                            }
+                        </button>
+                    :
                     <a className="flex items-center mr-4" href="/auth/login">
                         <button className="flex items-center cursor-pointer text-white hover:text-red-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
