@@ -20,5 +20,8 @@ func (r *AuthRoute) Setup(router *gin.Engine) {
 	{
 		auth.POST("/register", r.ac.Register)
 		auth.POST("/login", r.ac.Login)
+		auth.GET("/activate", r.ac.ActivateAccount)
+		auth.POST("/resend-verification", r.ac.ResendVerification)
+		//auth.POST("/forgot-password", r.ac.ForgotPassword)
 	}
 }

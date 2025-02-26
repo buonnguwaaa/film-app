@@ -13,6 +13,7 @@ type User struct {
 	// json: tên field khi chuyển thành JSON
 	// bson: tên field trong MongoDB
 
-	Email    string `json:"email" bson:"email"`
-	Password string `json:"password" bson:"password"`
+	Email       string `json:"email" bson:"email"`
+	Password    string `json:"password" bson:"password"`
+	IsActivated bool   `json:"is_activated" bson:"is_activated" default:"false"`
 }

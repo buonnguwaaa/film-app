@@ -9,6 +9,7 @@ import SearchMovies from './pages/main/SearchMovies'
 import AuthLogin from './pages/auth/AuthLogin'
 import AuthRegister from './pages/auth/AuthRegister'
 import AuthVerification from './pages/auth/AuthVerification'
+import AuthActivate from './pages/auth/AuthActivate'
 
 function App() {
   Modal.setAppElement('#root')
@@ -25,6 +26,7 @@ function App() {
           <Route path="login" element={<AuthLogin />} />
           <Route path="register" element={<AuthRegister />} />
           <Route path="verification" element={<AuthVerification />} />
+          <Route path="activate" element={<AuthActivate />} />
         </Route>
       </Routes>
     </BrowserRouter>

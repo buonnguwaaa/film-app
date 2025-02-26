@@ -2,6 +2,7 @@
 import Modal from 'react-modal'
 import ReactPlayer from 'react-player'
 import PropType from 'prop-types'
+import Loading from '../../../common/Loading'
 
 const customStyles = {
     content: {
@@ -40,10 +41,9 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, isLoading }) => (
                 X
             </button>
             
+            <div className='w-[640px] h-[360px]'>
             {isLoading ? (
-                <div className='w-[640px] h-[360px] flex items-center justify-center bg-gray-800'>
-                    <div className='animate-spin rounded-full h-16 w-16 border-4 border-gray-600 border-t-blue-500'></div>
-                </div>
+                <Loading />
             ) : trailerUrl ? (
                 <ReactPlayer 
                     url={trailerUrl} 
@@ -57,6 +57,7 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, isLoading }) => (
                     Không tìm thấy trailer
                 </div>
             )}
+            </div>
         </div>
     </Modal>
 )

@@ -1,10 +1,13 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { RegisterAPI } from "../../../services/authService";
 import useAuthStore from "../../../store/authStore";
+import Loading from "../../common/Loading";
 
 const Register = () => {
     const navigate = useNavigate();
     const { register } = useAuthStore();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,6 +19,7 @@ const Register = () => {
             alert('Mật khẩu không khớp');
             return;
         }
+        setIsLoading(true);
         try {
             const data = await RegisterAPI(email, username, password);
             console.log(data);
@@ -24,14 +28,24 @@ const Register = () => {
                 email: data.email,
             }
             register(dataUser);
+            setIsLoading(true);
             navigate('/auth/verification');
         } catch (error) {
             console.error('Error registering:', error);
         }
     }
+
+    useEffect(() => {
+        if (isLoading) {
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 5000);
+        }
+    }, [isLoading]);
+    
     return (
         <>
-                <h2 className="text-2xl text-white font-semibold mb-4">Đăng ký</h2>
+            <h2 className="text-2xl text-white font-semibold mb-4">Đăng ký</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="email" className="text-white block mb-2">Email</label>
@@ -58,7 +72,8 @@ const Register = () => {
                         <a href="/auth/login" className="text-red-500">Đăng nhập</a>
                     </div>
                 </form>
-            </>
+                {isLoading && <Loading />}
+        </>
     );
 };
 
