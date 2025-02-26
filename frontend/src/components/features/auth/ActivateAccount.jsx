@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import Loading from '../../common/Loading';
 
 const ActivateAccount = () => {
     const [searchParams] = useSearchParams();
@@ -13,7 +14,7 @@ const ActivateAccount = () => {
     useEffect(() => {
         const activateAccount = async () => {
             try {
-                // Gọi API để kích hoạt tài khoản
+                // Call API to activate account
                 const response = await fetch(`${import.meta.env.VITE_BE_URL}/auth/activate?token=${token}`, {
                     method: 'GET',
                     headers: {
@@ -25,14 +26,14 @@ const ActivateAccount = () => {
                 
                 if (response.ok) {
                     setIsSuccess(true);
-                    setMessage('Tài khoản của bạn đã được kích hoạt thành công! Vui lòng đăng nhập.');
+                    setMessage('Your account has been successfully activated! Please log in.');
                 } else {
                     setIsSuccess(false);
-                    setMessage(data.message || 'Có lỗi xảy ra khi kích hoạt tài khoản.');
+                    setMessage(data.message || 'An error occurred while activating the account.');
                 }
             } catch (error) {
                 setIsSuccess(false);
-                setMessage('Có lỗi xảy ra khi kết nối với server.');
+                setMessage('An error occurred while connecting to the server.');
             } finally {
                 setIsLoading(false);
             }
@@ -42,10 +43,10 @@ const ActivateAccount = () => {
     }, [token]);
 
     return (
-        <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Kích hoạt tài khoản</h2>
+        <div className="text-center h-[155px]">
+            <h2 className="text-2xl font-bold text-white mb-4">Activate Account</h2>
             {isLoading ? (
-                <div className="text-white">Đang xử lý...</div>
+                <Loading />
             ) : (
                 <div className="flex flex-col items-center justify-center">
                     {isSuccess ? (
