@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
@@ -222,20 +221,6 @@ func (ac *AuthController) RedirectToProvider(c *gin.Context) {
 }
 
 func (ac *AuthController) HandleProviderCallback(c *gin.Context) {
-	provider := c.Param("provider")
-	c.Request.URL.RawQuery = "provider=" + provider
-
-	callbackState := c.Query("state")
-	// Lấy state đã lưu trong session
-	session := sessions.Default(c)
-	sessionState := session.Get("state")
-
-	if callbackState != sessionState {
-		log.Printf("State mismatch: callback=%s, session=%s", callbackState, sessionState)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "State token mismatch"})
-		return
-	}
-
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		log.Printf("OAuth Error: %v", err)
@@ -247,28 +232,36 @@ func (ac *AuthController) HandleProviderCallback(c *gin.Context) {
 	defer cancel()
 
 	// Check if user is existed
-	var existingUser models.User
-	err = ac.collection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&existingUser)
-	if err == nil {
-		c.JSON(500, gin.H{"error": "User already existed"})
-		return
-	}
+	var currentUser models.User
+	err = ac.collection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&currentUser)
+	if err == mongo.ErrNoDocuments {
+		newUser := models.User{
+			Username:    user.Name,
+			Email:       user.Email,
+			Password:    "", // OAuth users won't have a password
+			IsActivated: true,
+		}
+		result, err := ac.collection.InsertOne(ctx, newUser)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Could not create new user"})
+			return
+		}
 
-	newUser := models.User{
-		Username: user.Name,
-		Email:    user.Email,
-		Password: "", // OAuth users won't have a password
-	}
+		// Luu thông tin user mới tạo vào struct currentUser để tạo token
+		currentUser.ID = result.InsertedID.(primitive.ObjectID)
+		currentUser.Username = newUser.Username
+		currentUser.Email = newUser.Email
+		currentUser.IsActivated = newUser.IsActivated
 
-	result, err := ac.collection.InsertOne(ctx, newUser)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "Could not create new user"})
+	} else if err != nil {
+		// Lỗi database khác
+		c.JSON(500, gin.H{"error": "Database error", "details": err.Error()})
 		return
 	}
 
 	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": result.InsertedID.(primitive.ObjectID).Hex(),
+		"userId": currentUser.ID.Hex(),
 		"exp":    time.Now().Add(time.Hour * 24).Unix(),
 	})
 
@@ -282,15 +275,9 @@ func (ac *AuthController) HandleProviderCallback(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"token": tokenString,
-		"user": gin.H{
-			"id":       result.InsertedID,
-			"username": newUser.Username,
-			"email":    newUser.Email,
-		},
-	})
+	// Set token as a cookie
+	c.SetCookie("token", tokenString, 3600*24, "/", os.Getenv("FE_URL"), false, true)
 
+	// Redirect to frontend URL
 	c.Redirect(http.StatusMovedPermanently, os.Getenv("FE_URL"))
-
 }

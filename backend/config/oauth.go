@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/google"
 	"log"
 	"net/http"
@@ -42,6 +43,12 @@ func SetupAuth(router *gin.Engine) {
 			os.Getenv("GOOGLE_CLIENT_SECRET"),
 			os.Getenv("BE_URL")+"/auth/google/callback",
 			"email", "profile",
+		),
+		facebook.New(
+			os.Getenv("FACEBOOK_CLIENT_ID"),
+			os.Getenv("FACEBOOK_CLIENT_SECRET"),
+			os.Getenv("BE_URL")+"/auth/facebook/callback",
+			"email", "public_profile",
 		),
 	)
 }
