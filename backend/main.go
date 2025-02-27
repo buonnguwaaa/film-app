@@ -20,15 +20,19 @@ func main() {
 	router := gin.Default()
 
 	c := cors.New(cors.Config{
-		AllowOrigins: []string{os.Getenv("FE_URL")},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders: []string{"Content-Type"},
+		AllowOrigins:     []string{os.Getenv("FE_URL")},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	})
 	router.Use(c)
 
 	// Connect to database
 	client := config.ConnectDB()
 	userCollection := config.GetCollection(client, "users")
+
+	// Setup OAuth
+	config.SetupAuth(router)
 
 	// Initialize controllers
 	authController := controllers.NewAuthController(userCollection)

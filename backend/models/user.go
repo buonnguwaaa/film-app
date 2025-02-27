@@ -10,10 +10,9 @@ type User struct {
 	// omitempty: bỏ qua field này nếu giá trị rỗng
 
 	Username string `json:"username" bson:"username"`
-	// json: tên field khi chuyển thành JSON
-	// bson: tên field trong MongoDB
 
 	Email       string `json:"email" bson:"email"`
 	Password    string `json:"password" bson:"password"`
 	IsActivated bool   `json:"is_activated" bson:"is_activated" default:"false"`
+	Avatar      string `json:"avatar" bson:"avatar"`
 }

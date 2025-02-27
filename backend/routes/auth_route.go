@@ -23,5 +23,7 @@ func (r *AuthRoute) Setup(router *gin.Engine) {
 		auth.GET("/activate", r.ac.ActivateAccount)
 		auth.POST("/resend-verification", r.ac.ResendVerification)
 		//auth.POST("/forgot-password", r.ac.ForgotPassword)
+		auth.GET("/:provider", r.ac.RedirectToProvider)
+		auth.GET("/:provider/callback", r.ac.HandleProviderCallback)
 	}
 }

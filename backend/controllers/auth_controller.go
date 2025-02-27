@@ -5,13 +5,17 @@ import (
 	"film-app/models"
 	"film-app/utils"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	"github.com/markbates/goth/gothic"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -160,6 +164,13 @@ func (ac *AuthController) ActivateAccount(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Check if account is already activated
+	err = ac.collection.FindOne(ctx, bson.M{"email": email, "is_activated": false}).Err()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Account is already activated"})
+		return
+	}
+
 	_, err = ac.collection.UpdateOne(ctx, bson.M{"email": email}, bson.M{"$set": bson.M{"is_activated": true}})
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Could not activate account"})
@@ -179,6 +190,15 @@ func (ac *AuthController) ResendVerification(c *gin.Context) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := ac.collection.FindOne(ctx, bson.M{"email": input.Email, "is_activated": false}).Err()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Account is already activated"})
+		return
+	}
+
 	// Send verification email
 	token, err := utils.GenerateToken(input.Email)
 	if err != nil {
@@ -193,4 +213,84 @@ func (ac *AuthController) ResendVerification(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"message": "Resend verification email successfully"})
+}
+
+func (ac *AuthController) RedirectToProvider(c *gin.Context) {
+	provider := c.Param("provider")
+	c.Request.URL.RawQuery = "provider=" + provider
+	gothic.BeginAuthHandler(c.Writer, c.Request)
+}
+
+func (ac *AuthController) HandleProviderCallback(c *gin.Context) {
+	provider := c.Param("provider")
+	c.Request.URL.RawQuery = "provider=" + provider
+
+	callbackState := c.Query("state")
+	// Lấy state đã lưu trong session
+	session := sessions.Default(c)
+	sessionState := session.Get("state")
+
+	if callbackState != sessionState {
+		log.Printf("State mismatch: callback=%s, session=%s", callbackState, sessionState)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "State token mismatch"})
+		return
+	}
+
+	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		log.Printf("OAuth Error: %v", err)
+		c.JSON(500, gin.H{"error": "Could not complete OAuth"})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Check if user is existed
+	var existingUser models.User
+	err = ac.collection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&existingUser)
+	if err == nil {
+		c.JSON(500, gin.H{"error": "User already existed"})
+		return
+	}
+
+	newUser := models.User{
+		Username: user.Name,
+		Email:    user.Email,
+		Password: "", // OAuth users won't have a password
+	}
+
+	result, err := ac.collection.InsertOne(ctx, newUser)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Could not create new user"})
+		return
+	}
+
+	// Generate JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": result.InsertedID.(primitive.ObjectID).Hex(),
+		"exp":    time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Could not generate token"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"token": tokenString,
+		"user": gin.H{
+			"id":       result.InsertedID,
+			"username": newUser.Username,
+			"email":    newUser.Email,
+		},
+	})
+
+	c.Redirect(http.StatusMovedPermanently, os.Getenv("FE_URL"))
+
 }

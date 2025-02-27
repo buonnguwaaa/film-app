@@ -25,7 +25,7 @@ func SendEmail(to, verificationLink string) error {
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "[Film Trailers Web] Verify your account")
 	body := "Click <a href=\"" + verificationLink + "\">here</a> to verify your account"
-	log.Println("body: ", body)
+	//log.Println("body: ", body)
 	m.SetBody("text/html", body)
 	//m.SetBody("text/html", "Click <a href=\""+verificationLink+"\">here</a> to verify your account")
 	//log.Println(m)
