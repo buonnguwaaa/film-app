@@ -4,8 +4,10 @@ import (
 	"context"
 	"film-app/models"
 	"film-app/utils"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -275,9 +277,12 @@ func (ac *AuthController) HandleProviderCallback(c *gin.Context) {
 		return
 	}
 
-	// Set token as a cookie
-	c.SetCookie("token", tokenString, 3600*24, "/", os.Getenv("FE_URL"), false, true)
-
-	// Redirect to frontend URL
-	c.Redirect(http.StatusMovedPermanently, os.Getenv("FE_URL"))
+	c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf(
+		"%s/auth/oauth-callback?token=%s&userId=%s&username=%s&email=%s",
+		os.Getenv("FE_URL"),
+		tokenString,
+		url.QueryEscape(currentUser.ID.Hex()),
+		url.QueryEscape(currentUser.Username),
+		url.QueryEscape(currentUser.Email),
+	))
 }

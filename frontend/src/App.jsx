@@ -10,6 +10,7 @@ import AuthLogin from './pages/auth/AuthLogin'
 import AuthRegister from './pages/auth/AuthRegister'
 import AuthVerification from './pages/auth/AuthVerification'
 import AuthActivate from './pages/auth/AuthActivate'
+import OAuthCallback from './components/features/auth/OAuthCallback'
 
 function App() {
   Modal.setAppElement('#root')
@@ -21,12 +22,14 @@ function App() {
           <Route index element={<Home />} />
           <Route path="movie/:id" element={<MovieDetails />} />
           <Route path="search" element={<SearchMovies />} />
+          
         </Route>
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<AuthLogin />} />
           <Route path="register" element={<AuthRegister />} />
           <Route path="verification" element={<AuthVerification />} />
           <Route path="activate" element={<AuthActivate />} />
+          <Route path="oauth-callback" element={<OAuthCallback />} />
         </Route>
       </Routes>
     </BrowserRouter>
