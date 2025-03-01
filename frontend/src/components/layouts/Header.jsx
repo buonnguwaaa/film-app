@@ -6,7 +6,7 @@ import useScrollDirection from '@/hooks/useScrollDirection';
 import './Header.css'
 import { FaSearch } from 'react-icons/fa';
 import DropDown from '../common/DropDown'
-import DefaultAvatar from '@/assets/images/default-avatar.png'
+import AvatarIcon from '../common/AvatarIcon';
 
 const Header = ({ onSearch }) => {
     const [isDropDown, setDropDown] = useState(false)
@@ -85,14 +85,19 @@ const Header = ({ onSearch }) => {
                 { isLoggedIn ? 
                     
                         <button className='flex items-center mr-6 cursor-pointer relative' onClick={toggleDropDown}>
-                            <img src= {DefaultAvatar} alt="Avatar" className="h-8 w-8 rounded-full object-cover" />
+                            <AvatarIcon w={8} h={8}/>
                             <div className="arrow-container">
                                 <div className="arrow-down"></div>
                             </div>
-                            { isDropDown ?
-                                <DropDown/> :
-                                <></>
-                            }
+                            <div 
+                            className={`origin-top-right transition-all duration-300 ${
+                                isDropDown && isVisible 
+                                    ? 'transform scale-100 opacity-100' 
+                                    : 'transform scale-95 opacity-0 pointer-events-none'
+                            }`}
+                            >
+                                <DropDown />
+                            </div>
                         </button>
                     :
                     <a className="flex items-center mr-4" href="/auth/login">

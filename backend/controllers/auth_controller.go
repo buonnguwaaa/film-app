@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"film-app/models"
+	"film-app/services"
 	"film-app/utils"
 	"fmt"
 	"log"
@@ -12,8 +13,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"github.com/markbates/goth/gothic"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,11 +23,20 @@ import (
 // AuthController là struct chứa các phương thức xử lý logic liên quan đến đăng ký và đăng nhập
 type AuthController struct {
 	collection *mongo.Collection
+	jwtService *services.JWTService
 }
 
 // NewAuthController khởi tạo AuthController
 func NewAuthController(collection *mongo.Collection) *AuthController {
-	return &AuthController{collection: collection}
+	jwtService, err := services.NewJWTService()
+	if err != nil {
+		log.Fatal("Error loading JWT service")
+	}
+
+	return &AuthController{
+		collection: collection,
+		jwtService: jwtService,
+	}
 }
 
 type RegisterInput struct {
@@ -86,7 +94,7 @@ func (ac *AuthController) Register(c *gin.Context) {
 	})
 
 	// Send verification email
-	token, err := utils.GenerateToken(newUser.Email)
+	token, err := ac.jwtService.GenerateVerificationToken(newUser.Email)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -124,16 +132,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 	}
 
 	// Generate JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": user.ID.Hex(),
-		"exp":    time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	tokenString, err := ac.jwtService.GenerateAccessToken(user.ID.Hex())
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Could not generate token"})
 		return
@@ -156,7 +155,7 @@ func (ac *AuthController) ActivateAccount(c *gin.Context) {
 		return
 	}
 
-	email, err := utils.ParseToken(token)
+	email, err := ac.jwtService.ParseVerificationToken(token)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Could not parse token"})
 		return
@@ -201,7 +200,7 @@ func (ac *AuthController) ResendVerification(c *gin.Context) {
 	}
 
 	// Send verification email
-	token, err := utils.GenerateToken(input.Email)
+	token, err := ac.jwtService.GenerateVerificationToken(input.Email)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -262,16 +261,7 @@ func (ac *AuthController) HandleProviderCallback(c *gin.Context) {
 	}
 
 	// Generate JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": currentUser.ID.Hex(),
-		"exp":    time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	tokenString, err := ac.jwtService.GenerateAccessToken(currentUser.ID.Hex())
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Could not generate token"})
 		return

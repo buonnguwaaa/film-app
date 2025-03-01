@@ -1,15 +1,26 @@
 package middlewares
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
-	"os"
+	"film-app/services"
+
+	"log"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // AuthMiddleware là middleware kiểm tra token của user
 func AuthMiddleware() gin.HandlerFunc {
+	jwtService, err := services.NewJWTService()
+	if err != nil {
+		log.Printf("Error loading JWT service: %v", err)
+		return func(c *gin.Context) {
+			c.JSON(500, gin.H{"error": "Error loading JWT service"})
+			c.Abort()
+			return
+		}
+	}
+
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -26,25 +37,15 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		err := godotenv.Load()
-		if err != nil {
-			c.JSON(500, gin.H{"error": "Could not load .env file"})
-			c.Abort()
-			return
-		}
-
 		tokenString := part[1]
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
+		userId, err := jwtService.ParseAccessToken(tokenString)
 		if err != nil {
-			c.JSON(401, gin.H{"error": err.Error()})
+			c.JSON(401, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
 
-		claims := token.Claims.(jwt.MapClaims)
-		c.Set("userId", claims["userId"])
+		c.Set("userId", userId)
 		c.Next()
 	}
 }
