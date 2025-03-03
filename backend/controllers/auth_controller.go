@@ -99,7 +99,7 @@ func (ac *AuthController) Register(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	verificationLink := "http://localhost:5173/auth/activate?token=" + token
+	verificationLink := os.Getenv("FE_URL") + "/auth/activate?token=" + token
 
 	if err := utils.SendEmail(newUser.Email, verificationLink); err != nil {
 		c.JSON(500, gin.H{"error": "Could not send verification email"})
@@ -205,7 +205,7 @@ func (ac *AuthController) ResendVerification(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	verificationLink := "http://localhost:5173/auth/activate?token=" + token
+	verificationLink := os.Getenv("FE_URL") + "/auth/activate?token=" + token
 
 	if err := utils.SendEmail(input.Email, verificationLink); err != nil {
 		c.JSON(500, gin.H{"error": "Could not send verification email"})
